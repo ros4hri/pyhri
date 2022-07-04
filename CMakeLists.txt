@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.0.2)
 project(pyhri)
 
 find_package(catkin REQUIRED COMPONENTS
+    rostest
   cv_bridge
   geometry_msgs
   hri_msgs
@@ -18,4 +19,6 @@ catkin_package(
 )
 
 catkin_python_setup()
+
+add_rostest(test/test_pyhri.test)
 
