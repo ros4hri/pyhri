@@ -30,25 +30,27 @@ class TestHRI(unittest.TestCase):
 
         hri_listener = hri.HRIListener()
 
+        self.wait()
+
         self.assertEquals(self.faces_pub.get_num_connections(), 1)
         self.assertEquals(len(hri_listener.get_faces()), 0)
 
-        self.faces_pub.publish(["A"])
+        self.faces_pub.publish(ids=["A"])
         self.wait()
         self.assertEquals(len(hri_listener.get_faces()), 1)
         self.assertIn("A", hri_listener.get_faces())
 
-        self.faces_pub.publish(["A"])
+        self.faces_pub.publish(ids=["A"])
         self.wait()
         self.assertEquals(len(hri_listener.get_faces()), 1)
 
-        self.faces_pub.publish(["A", "B"])
+        self.faces_pub.publish(ids=["A", "B"])
         self.wait()
         self.assertEquals(len(hri_listener.get_faces()), 2)
         self.assertIn("A", hri_listener.get_faces())
         self.assertIn("B", hri_listener.get_faces())
 
-        self.faces_pub.publish([])
+        self.faces_pub.publish(ids=[])
         self.wait()
         self.assertEquals(len(hri_listener.get_faces()), 0)
 
@@ -63,7 +65,7 @@ class TestHRI(unittest.TestCase):
             "/humans/faces/A/roi", RegionOfInterest, queue_size=1, latch=True
         )
 
-        self.faces_pub.publish(["A"])
+        self.faces_pub.publish(ids=["A"])
         self.wait()
 
         self.assertEquals(roi_A_pub.get_num_connections(), 1)

@@ -26,6 +26,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+import rospy
+
 from .body import Body
 from .face import Face
 from .voice import Voice
@@ -36,8 +38,7 @@ from typing import Mapping
 
 
 class HRIListener:
-    def __init__(self, nh):
-        self.node_ = nh
+    def __init__(self, reference_frame="base_link"):
 
         self.feature_subscribers_ = {}
 
@@ -53,73 +54,116 @@ class HRIListener:
         self.voice_callbacks = []
         self.voice_lost_callbacks = []
 
-        self.persons = {}
-        self.person_callbacks = []
-        self.person_lost_callbacks = []
         self.tracked_persons = {}
         self.person_tracked_callbacks = []
         self.person_tracked_lost_callbacks = []
 
+        self.known_persons = {}
+        self.known_person_callbacks = []
+        self.known_person_lost_callbacks = []
+
         self._tf_buffer = None
         self._tf_listener = None
 
-    def init(self):
-        pass
+        self._reference_frame = reference_frame
 
-    def onTrackedFeature(self, feature_type, tracked: IdsList):
-        pass
+        rospy.logdebug("Initialising the Python HRI listener")
 
-    def getFaces(self) -> Mapping[str, Face]:
-        pass
+        self._subscribers = {
+            "face": rospy.Subscriber(
+                "/humans/faces/tracked", IdsList, self.on_tracked_faces
+            ),
+            "body": rospy.Subscriber(
+                "/humans/bodies/tracked", IdsList, self.on_tracked_bodies
+            ),
+            "voice": rospy.Subscriber(
+                "/humans/voices/tracked", IdsList, self.on_tracked_voices
+            ),
+            "persons": rospy.Subscriber(
+                "/humans/persons/tracked", IdsList, self.on_tracked_persons
+            ),
+            "known_persons": rospy.Subscriber(
+                "/humans/persons/known", IdsList, self.on_known_persons
+            ),
+        }
+
+    def update_trackers(self, tracker, tracker_class, new_ids):
+
+        new_ids = set(new_ids)
+        current_ids = set(tracker.keys())
+
+        to_remove = current_ids - new_ids
+        to_add = new_ids - current_ids
+
+        for id in to_remove:
+            del tracker[id]
+
+        for id in to_add:
+            tracker[id] = tracker_class(id)
+
+    def on_tracked_faces(self, tracked: IdsList):
+
+        self.update_trackers(self.faces, Face, tracked.ids)
+
+    def on_tracked_bodies(self, tracked: IdsList):
+
+        self.update_trackers(self.bodies, Body, tracked.ids)
+
+    def on_tracked_voices(self, tracked: IdsList):
+
+        self.update_trackers(self.voices, Voice, tracked.ids)
+
+    def on_tracked_persons(self, tracked: IdsList):
+
+        self.update_trackers(self.tracked_persons, Person, tracked.ids)
+
+    def on_known_persons(self, tracked: IdsList):
+
+        self.update_trackers(self.known_persons, Person, tracked.ids)
+
+    def get_faces(self) -> Mapping[str, Face]:
+        return self.faces
 
     # Registers a callback function, to be invoked everytime a new face
     # is detected.
-    # /
-    def onFace(self, callback):
+    def on_face(self, callback):
         self.face_callbacks.append((callback))
 
     # Registers a callback function, to be invoked everytime a
     # previously tracked face is lost (eg, not detected anymore)
-    # /
-    def onFaceLost(self, callback):
+    def on_face_lost(self, callback):
         self.face_lost_callbacks.append((callback))
 
     # Returns the list of currently detected bodies, mapped to their IDs
     #
     # Bodies are returned as constant std::weak_ptr as they may disappear at any point.
-    # /
-    def getBodies(self) -> Mapping[str, Body]:
-        pass
+    def get_bodies(self) -> Mapping[str, Body]:
+        return self.bodies
 
     # Registers a callback function, to be invoked everytime a new body
     # is detected.
-    # /
-    def onBody(self, callback):
+    def on_body(self, callback):
         self.body_callbacks.append((callback))
 
     # Registers a callback function, to be invoked everytime a
     # previously tracked body is lost (eg, not detected anymore)
-    # /
-    def onBodyLost(self, callback):
+    def on_body_lost(self, callback):
         self.body_lost_callbacks.append((callback))
 
     # Returns the list of currently detected voices, mapped to their IDs
     #
     # Voices are returned as constant std::weak_ptr as they may disappear at any point.
-    # /
-    def getVoices(self) -> Mapping[str, Voice]:
-        pass
+    def get_voices(self) -> Mapping[str, Voice]:
+        return self.voices
 
     # Registers a callback function, to be invoked everytime a new voice
     # is detected.
-    # /
-    def onVoice(self, callback):
+    def on_voice(self, callback):
         self.voice_callbacks.append((callback))
 
     # Registers a callback function, to be invoked everytime a
     # previously tracked voice is lost (eg, not detected anymore)
-    # /
-    def onVoiceLost(self, callback):
+    def on_voice_lost(self, callback):
         self.voice_lost_callbacks.append((callback))
 
     # Returns the list of all known persons, whether or not they are
@@ -130,48 +174,41 @@ class HRIListener:
     # disappear in general, *anonymous* persons (created because, eg, a face has
     # been detected, and we can infer a yet-to-be-recognised person does exist)
     # can disappear.
-    # /
-    def getPersons(self) -> Mapping[str, Person]:
-        pass
+    def get_persons(self) -> Mapping[str, Person]:
+        return self.known_persons
 
     # Registers a callback function, to be invoked everytime a new person
     # is detected.
-    # /
-    def onPerson(self, callback):
-        self.person_callbacks.append((callback))
+    def on_person(self, callback):
+        self.known_person_callbacks.append((callback))
 
     # Registers a callback function, to be invoked everytime a person
     # is lost. This can *only* happen for anonymous persons. Identified persons
     # will never be removed from the list of all known persons.
-    # /
-    def onPersonLost(self, callback):
-        self.person_lost_callbacks.append((callback))
+    def on_person_lost(self, callback):
+        self.known_person_lost_callbacks.append((callback))
 
     # Returns the list of currently detected persons, mapped to their IDs
     #
-    # Persons are returned as constant std::weak_ptr: while person do *not* disappear in
-    # general, *anonymous* persons (created because, eg, a face has been detected, and we
-    # can infer a yet-to-be-recognised person does exist) can disappear.
-    # /
-    def getTrackedPersons(self) -> Mapping[str, Person]:
-        pass
+    # Note that, while person do *not* disappear in general, *anonymous*
+    # persons (created because, eg, a face has been detected, and we can infer
+    # a yet-to-be-recognised person does exist) can disappear.
+    def get_tracked_persons(self) -> Mapping[str, Person]:
+        return self.tracked_persons
 
     # Registers a callback function, to be invoked everytime a new person
     # is detected and actively tracked (eg, currently seen).
-    # /
-    def onTrackedPerson(self, callback):
+    def on_tracked_person(self, callback):
         self.person_tracked_callbacks.append((callback))
 
     # Registers a callback function, to be invoked everytime a previously tracked
     # person is lost.
-    # /
-    def onTrackedPersonLost(self, callback):
+    def on_tracked_person_lost(self, callback):
         self.person_tracked_lost_callbacks.append((callback))
 
     # sets the reference frame from which the TF transformations of the persons will
     # be returned (via `Person::transform()`).
     #
     # By default, `base_link`.
-    # /
-    def setReferenceFrame(frame):
+    def set_reference_frame(frame):
         self._reference_frame = frame
