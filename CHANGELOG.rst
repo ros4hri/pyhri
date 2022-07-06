@@ -2,8 +2,8 @@
 Changelog for package pyhri
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.1 (2022-07-06)
+------------------
 * various fixes after first test with actual ROS4HRI messages
 * Contributors: Séverin Lemaignan
 
