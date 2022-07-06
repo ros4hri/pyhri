@@ -1,5 +1,4 @@
 from typing import Optional
-import cv2
 import numpy.typing as npt
 
 import rospy
@@ -27,6 +26,8 @@ class Face:
         self.landmarks: Optional[FacialLandmarks] = None
         self.softbiometrics: Optional[SoftBiometrics] = None
 
+        self.cv_bridge = CvBridge()
+
         rospy.logdebug("New face detected: " + self.ns)
 
         self.roi_sub = rospy.Subscriber(self.ns + "/roi", RegionOfInterest, self.on_roi)
@@ -46,8 +47,6 @@ class Face:
         self.softbiometrics_sub = rospy.Subscriber(
             self.ns + "/softbiometrics", SoftBiometrics, self.on_softbiometrics
         )
-
-        self.cv_bridge = CvBridge()
 
     def close(self):
         self.roi_sub.unregister()
@@ -70,3 +69,6 @@ class Face:
 
     def on_softbiometrics(self, msg):
         self.softbiometrics = msg
+
+    def __str__(self):
+        return self.id

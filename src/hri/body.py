@@ -1,9 +1,11 @@
 from typing import Optional
-import cv2
 import numpy.typing as npt
 
 import rospy
 from sensor_msgs.msg import RegionOfInterest, Image
+from cv_bridge import CvBridge
+
+from .face import Rect
 
 
 class Body:
@@ -11,8 +13,10 @@ class Body:
         self.id = id
         self.ns = "/humans/bodies/" + id
 
-        self.roi: Optional[cv2.Rect] = None
+        self.roi: Optional[Rect] = None
         self.cropped: Optional[npt.ArrayLike] = None
+
+        self.cv_bridge = CvBridge()
 
         rospy.logdebug("New body detected: " + self.ns)
 
@@ -27,7 +31,10 @@ class Body:
         self.cropped_sub.unregister()
 
     def on_roi(self, msg):
-        self.roi = cv2.Rect(msg.x_offset, msg.y_offset, msg.width, msg.height)
+        self.roi = Rect(msg.x_offset, msg.y_offset, msg.width, msg.height)
 
     def on_cropped(self, msg):
         self.cropped = self.cv_bridge.imgmsg_to_cv2(msg, desired_encoding="passthrough")
+
+    def __str__(self):
+        return self.id

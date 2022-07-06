@@ -10,3 +10,6 @@ class Voice:
 
     def close(self):
         pass
+
+    def __str__(self):
+        return self.id
