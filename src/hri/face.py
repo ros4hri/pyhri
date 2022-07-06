@@ -8,12 +8,20 @@ from hri_msgs.msg import FacialLandmarks, SoftBiometrics
 from cv_bridge import CvBridge
 
 
+class Rect:
+    def __init__(self, x, y, w, h):
+        self.x = x
+        self.y = y
+        self.width = w
+        self.height = h
+
+
 class Face:
     def __init__(self, id, tf_buffer, reference_frame):
         self.id = id
         self.ns = "/humans/faces/" + id
 
-        self.roi: Optional[cv2.Rect] = None
+        self.roi: Optional[Rect] = None
         self.cropped: Optional[npt.ArrayLike] = None
         self.aligned: Optional[npt.ArrayLike] = None
         self.landmarks: Optional[FacialLandmarks] = None
@@ -49,7 +57,7 @@ class Face:
         self.softbiometrics_sub.unregister()
 
     def on_roi(self, msg):
-        self.roi = cv2.Rect(msg.x_offset, msg.y_offset, msg.width, msg.height)
+        self.roi = Rect(msg.x_offset, msg.y_offset, msg.width, msg.height)
 
     def on_cropped(self, msg):
         self.cropped = self.cv_bridge.imgmsg_to_cv2(msg, desired_encoding="passthrough")

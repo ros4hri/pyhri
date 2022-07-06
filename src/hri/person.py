@@ -7,6 +7,7 @@ from geometry_msgs.msg import TransformStamped
 
 from tf2_ros import LookupException
 
+
 PERSON_TF_TIMEOUT = rospy.Duration(0.01)
 
 
@@ -16,9 +17,19 @@ class Person:
         self.ns = "/humans/persons/" + id
         self.frame = "person_" + id
 
+        # these 3 member variables are set when the Person instance is constructed in hri.py
+        self.faces_ = None
+        self.bodies_ = None
+        self.voices_ = None
+
+        from . import Face, Body, Voice
+
         self.face_id: Optional[str] = None
+        self.face: Optional[Face] = None
         self.body_id: Optional[str] = None
+        self.body: Optional[Body] = None
         self.voice_id: Optional[str] = None
+        self.voice: Optional[Voice] = None
 
         self.anonymous: bool = False
         self.engagement_status: Optional[EngagementLevel] = None
@@ -67,12 +78,15 @@ class Person:
 
     def on_face_id(self, msg):
         self.face_id = msg.data
+        self.face = self.faces_[self.face_id]
 
     def on_body_id(self, msg):
-        self.body = msg.data
+        self.body_id = msg.data
+        self.body = self.bodies_[self.body_id]
 
     def on_voice_id(self, msg):
         self.voice_id = msg.data
+        self.voice = self.voices_[self.voice_id]
 
     def on_anonymous(self, msg):
         self.anonymous = msg.data

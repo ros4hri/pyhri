@@ -104,6 +104,13 @@ class HRIListener:
         for id in to_add:
             tracker[id] = tracker_class(id, self._tf_buffer, self._reference_frame)
 
+            # Person's instance need access to the list of detect faces/bodies/voices
+            # to return the right one
+            if tracker_class == Person:
+                tracker[id].faces_ = self.faces
+                tracker[id].bodies_ = self.bodies
+                tracker[id].voices_ = self.voices
+
     def on_tracked_faces(self, tracked: IdsList):
 
         self.update_trackers(self.faces, Face, tracked.ids)
