@@ -25,8 +25,8 @@ class Person:
         self.alias: Optional[str] = None
         self.loc_confidence: float = 0.0
 
-        self.tf_buffer = tf_buffer
-        self.reference_frame = reference_frame
+        self._tf_buffer = tf_buffer
+        self._reference_frame = reference_frame
 
         rospy.logdebug("New person detected: " + self.ns)
 
@@ -55,6 +55,15 @@ class Person:
         self.loc_confidence_sub = rospy.Subscriber(
             self.ns + "/location_confidence", Float32, self.on_loc_confidence
         )
+
+    def close(self):
+        self.face_id_sub.unregister()
+        self.body_id_sub.unregister()
+        self.voice_id_sub.unregister()
+        self.anonymous_sub.unregister()
+        self.alias_sub.unregister()
+        self.engagement_sub.unregister()
+        self.loc_confidence_sub.unregister()
 
     def on_face_id(self, msg):
         self.face_id = msg.data
@@ -97,8 +106,8 @@ class Person:
             return TransformStamped()
 
         try:
-            return self.tf_buffer.lookupTransform(
-                self.reference_frame, self.frame, rospy.Time(0), PERSON_TF_TIMEOUT
+            return self._tf_buffer.lookupTransform(
+                self._reference_frame, self.frame, rospy.Time(0), PERSON_TF_TIMEOUT
             )
 
         except LookupException:
@@ -106,7 +115,7 @@ class Person:
                 "failed to transform person frame "
                 + self.frame
                 + " to "
-                + self.reference_frame
+                + self._reference_frame
                 + ". Are the frames published?"
             )
 

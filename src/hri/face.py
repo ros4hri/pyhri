@@ -1,12 +1,23 @@
+from typing import Optional
+import cv2
+import numpy.typing as npt
+
 import rospy
 from sensor_msgs.msg import RegionOfInterest, Image
 from hri_msgs.msg import FacialLandmarks, SoftBiometrics
+from cv_bridge import CvBridge
 
 
 class Face:
-    def __init__(self, id):
+    def __init__(self, id, tf_buffer, reference_frame):
         self.id = id
         self.ns = "/humans/faces/" + id
+
+        self.roi: Optional[cv2.Rect] = None
+        self.cropped: Optional[npt.ArrayLike] = None
+        self.aligned: Optional[npt.ArrayLike] = None
+        self.landmarks: Optional[FacialLandmarks] = None
+        self.softbiometrics: Optional[SoftBiometrics] = None
 
         rospy.logdebug("New face detected: " + self.ns)
 
@@ -28,17 +39,26 @@ class Face:
             self.ns + "/softbiometrics", SoftBiometrics, self.on_softbiometrics
         )
 
+        self.cv_bridge = CvBridge()
+
+    def close(self):
+        self.roi_sub.unregister()
+        self.cropped_sub.unregister()
+        self.aligned_sub.unregister()
+        self.landmarks_sub.unregister()
+        self.softbiometrics_sub.unregister()
+
     def on_roi(self, msg):
-        pass
+        self.roi = cv2.Rect(msg.x_offset, msg.y_offset, msg.width, msg.height)
 
     def on_cropped(self, msg):
-        pass
+        self.cropped = self.cv_bridge.imgmsg_to_cv2(msg, desired_encoding="passthrough")
 
     def on_aligned(self, msg):
-        pass
+        self.aligned = self.cv_bridge.imgmsg_to_cv2(msg, desired_encoding="passthrough")
 
     def on_landmarks(self, msg):
-        pass
+        self.landmarks = msg
 
     def on_softbiometrics(self, msg):
-        pass
+        self.softbiometrics = msg

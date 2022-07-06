@@ -26,6 +26,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+from typing import Mapping
+
 import rospy
 
 from .body import Body
@@ -34,7 +36,7 @@ from .voice import Voice
 from .person import Person
 from hri_msgs.msg import IdsList
 
-from typing import Mapping
+from tf2_ros import Buffer, TransformListener
 
 
 class HRIListener:
@@ -42,28 +44,28 @@ class HRIListener:
 
         self.feature_subscribers_ = {}
 
-        self.faces = {}
+        self.faces: Mapping[str, Face] = {}
         self.face_callbacks = []
         self.face_lost_callbacks = []
 
-        self.bodies = {}
+        self.bodies: Mapping[str, Body] = {}
         self.body_callbacks = []
         self.body_lost_callbacks = []
 
-        self.voices = {}
+        self.voices: Mapping[str, Voice] = {}
         self.voice_callbacks = []
         self.voice_lost_callbacks = []
 
-        self.tracked_persons = {}
+        self.tracked_persons: Mapping[str, Person] = {}
         self.person_tracked_callbacks = []
         self.person_tracked_lost_callbacks = []
 
-        self.known_persons = {}
+        self.known_persons: Mapping[str, Person] = {}
         self.known_person_callbacks = []
         self.known_person_lost_callbacks = []
 
-        self._tf_buffer = None
-        self._tf_listener = None
+        self._tf_buffer = Buffer()
+        self._tf_listener = TransformListener(self._tf_buffer)
 
         self._reference_frame = reference_frame
 
@@ -79,7 +81,7 @@ class HRIListener:
             "voice": rospy.Subscriber(
                 "/humans/voices/tracked", IdsList, self.on_tracked_voices
             ),
-            "persons": rospy.Subscriber(
+            "tracked_persons": rospy.Subscriber(
                 "/humans/persons/tracked", IdsList, self.on_tracked_persons
             ),
             "known_persons": rospy.Subscriber(
@@ -96,10 +98,11 @@ class HRIListener:
         to_add = new_ids - current_ids
 
         for id in to_remove:
+            tracker[id].close()
             del tracker[id]
 
         for id in to_add:
-            tracker[id] = tracker_class(id)
+            tracker[id] = tracker_class(id, self._tf_buffer, self._reference_frame)
 
     def on_tracked_faces(self, tracked: IdsList):
 
@@ -121,9 +124,6 @@ class HRIListener:
 
         self.update_trackers(self.known_persons, Person, tracked.ids)
 
-    def get_faces(self) -> Mapping[str, Face]:
-        return self.faces
-
     # Registers a callback function, to be invoked everytime a new face
     # is detected.
     def on_face(self, callback):
@@ -134,12 +134,6 @@ class HRIListener:
     def on_face_lost(self, callback):
         self.face_lost_callbacks.append((callback))
 
-    # Returns the list of currently detected bodies, mapped to their IDs
-    #
-    # Bodies are returned as constant std::weak_ptr as they may disappear at any point.
-    def get_bodies(self) -> Mapping[str, Body]:
-        return self.bodies
-
     # Registers a callback function, to be invoked everytime a new body
     # is detected.
     def on_body(self, callback):
@@ -149,12 +143,6 @@ class HRIListener:
     # previously tracked body is lost (eg, not detected anymore)
     def on_body_lost(self, callback):
         self.body_lost_callbacks.append((callback))
-
-    # Returns the list of currently detected voices, mapped to their IDs
-    #
-    # Voices are returned as constant std::weak_ptr as they may disappear at any point.
-    def get_voices(self) -> Mapping[str, Voice]:
-        return self.voices
 
     # Registers a callback function, to be invoked everytime a new voice
     # is detected.
