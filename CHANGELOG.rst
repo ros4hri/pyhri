@@ -2,8 +2,8 @@
 Changelog for package pyhri
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.2 (2022-07-12)
+------------------
 * [cmake] add test only behing CATKIN_ENABLE_TESTING
 * Contributors: Séverin Lemaignan
 
