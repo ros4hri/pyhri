@@ -20,5 +20,7 @@ catkin_package(
 
 catkin_python_setup()
 
-add_rostest(test/test_pyhri.test)
+if(CATKIN_ENABLE_TESTING)
+    add_rostest(test/test_pyhri.test)
+endif()
 
