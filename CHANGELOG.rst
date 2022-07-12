@@ -2,6 +2,11 @@
 Changelog for package pyhri
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [cmake] add test only behing CATKIN_ENABLE_TESTING
+* Contributors: Séverin Lemaignan
+
 0.1.1 (2022-07-06)
 ------------------
 * various fixes after first test with actual ROS4HRI messages
