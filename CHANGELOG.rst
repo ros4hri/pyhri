@@ -2,6 +2,12 @@
 Changelog for package pyhri
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* refining waiting + closing in tests -- they all pass reliably on my machine
+* unregister from main topics when closing HRIListener
+* Contributors: Séverin Lemaignan
+
 0.1.2 (2022-07-12)
 ------------------
 * [cmake] add test only behing CATKIN_ENABLE_TESTING
