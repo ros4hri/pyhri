@@ -89,6 +89,19 @@ class HRIListener:
             ),
         }
 
+    def __del__(self):
+        self.close()
+
+    def close(self):
+
+        if self._subscribers:
+            for _, sub in self._subscribers.items():
+                sub.unregister()
+
+            self._subscribers = {}
+
+            rospy.logdebug("HRI listener closed")
+
     def update_trackers(self, tracker, tracker_class, new_ids):
 
         new_ids = set(new_ids)
