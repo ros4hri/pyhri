@@ -2,8 +2,8 @@
 Changelog for package pyhri
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.3 (2022-07-13)
+------------------
 * refining waiting + closing in tests -- they all pass reliably on my machine
 * unregister from main topics when closing HRIListener
 * Contributors: Séverin Lemaignan
