@@ -2,6 +2,6 @@
 
   <arg name="test_args" default=""/>
 
-  <test test-name="pyhri" pkg="pyhri" type="test_pyhri.py" time-limit="5.0" args="$(arg test_args)"/>
+  <test test-name="pyhri" pkg="pyhri" type="test_pyhri.py" time-limit="20.0" args="$(arg test_args)"/>
 
 </launch>

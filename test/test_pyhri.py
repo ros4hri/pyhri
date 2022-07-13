@@ -40,14 +40,14 @@ class TestHRI(unittest.TestCase):
         self.tracked_persons_pub = rospy.Publisher(
             "/humans/persons/tracked", IdsList, queue_size=1, latch=False
         )
+        self.wait()
 
-    def wait(self):
-        rospy.sleep(0.04)
+    def wait(self, delay=0.05):
+        rospy.sleep(delay)
 
     def test_get_faces(self):
 
         hri_listener = hri.HRIListener()
-
         self.wait()
 
         self.assertEquals(self.faces_pub.get_num_connections(), 1)
@@ -72,9 +72,12 @@ class TestHRI(unittest.TestCase):
         self.wait()
         self.assertEquals(len(hri_listener.faces), 0)
 
+        hri_listener.close()
+
     def test_get_faces_roi(self):
 
         hri_listener = hri.HRIListener()
+        self.wait()
 
         roi_A_pub = rospy.Publisher(
             "/humans/faces/A/roi", RegionOfInterest, queue_size=1, latch=True
@@ -84,12 +87,12 @@ class TestHRI(unittest.TestCase):
         )
 
         self.faces_pub.publish(ids=["A"])
-        self.wait()
+        self.wait(delay=0.1)
 
         self.assertEquals(roi_A_pub.get_num_connections(), 1)
 
         self.faces_pub.publish(ids=["B"])
-        self.wait()
+        self.wait(delay=0.1)
 
         self.assertEquals(
             roi_A_pub.get_num_connections(),
@@ -117,17 +120,18 @@ class TestHRI(unittest.TestCase):
         # but should still get its RoI, as /roi is latched.
         roi_A_pub.publish(width=20)
         self.faces_pub.publish(ids=["A", "B"])
-        self.wait()
+        self.wait(delay=0.1)
 
         self.assertEquals(hri_listener.faces["A"].ns, "/humans/faces/A")
         self.assertEquals(hri_listener.faces["A"].roi.width, 20)
         self.assertEquals(hri_listener.faces["B"].ns, "/humans/faces/B")
         self.assertEquals(hri_listener.faces["A"].roi.width, 20)
 
+        hri_listener.close()
+
     def test_get_bodies(self):
 
         hri_listener = hri.HRIListener()
-
         self.wait()
 
         self.assertEquals(self.bodies_pub.get_num_connections(), 1)
@@ -163,10 +167,11 @@ class TestHRI(unittest.TestCase):
         self.wait()
         self.assertEquals(len(hri_listener.bodies), 0)
 
+        hri_listener.close()
+
     def test_get_voices(self):
 
         hri_listener = hri.HRIListener()
-
         self.wait()
 
         self.assertEquals(self.voices_pub.get_num_connections(), 1)
@@ -202,17 +207,18 @@ class TestHRI(unittest.TestCase):
         self.wait()
         self.assertEquals(len(hri_listener.voices), 0)
 
+        hri_listener.close()
+
     def test_get_known_persons(self):
 
         hri_listener = hri.HRIListener()
-
         self.wait()
 
         self.assertEquals(self.known_persons_pub.get_num_connections(), 1)
         self.assertEquals(len(hri_listener.known_persons), 0)
 
         self.known_persons_pub.publish(ids=["A"])
-        self.wait()
+        self.wait(delay=0.1)
         self.assertEquals(len(hri_listener.known_persons), 1)
         self.assertIn("A", hri_listener.known_persons)
         self.assertEquals(hri_listener.known_persons["A"].id, "A")
@@ -241,17 +247,18 @@ class TestHRI(unittest.TestCase):
         self.wait()
         self.assertEquals(len(hri_listener.known_persons), 0)
 
+        hri_listener.close()
+
     def test_get_tracked_persons(self):
 
         hri_listener = hri.HRIListener()
-
         self.wait()
 
         self.assertEquals(self.tracked_persons_pub.get_num_connections(), 1)
         self.assertEquals(len(hri_listener.tracked_persons), 0)
 
         self.tracked_persons_pub.publish(ids=["A"])
-        self.wait()
+        self.wait(delay=0.1)
         self.assertEquals(len(hri_listener.tracked_persons), 1)
         self.assertIn("A", hri_listener.tracked_persons)
         self.assertEquals(hri_listener.tracked_persons["A"].id, "A")
@@ -261,7 +268,7 @@ class TestHRI(unittest.TestCase):
         self.assertEquals(len(hri_listener.tracked_persons), 1)
 
         self.tracked_persons_pub.publish(ids=["A", "B"])
-        self.wait()
+        self.wait(delay=0.1)
         self.assertEquals(len(hri_listener.tracked_persons), 2)
         self.assertIn("A", hri_listener.tracked_persons)
         self.assertIn("B", hri_listener.tracked_persons)
@@ -271,7 +278,7 @@ class TestHRI(unittest.TestCase):
         self.assertEquals(len(hri_listener.tracked_persons), 2)
 
         self.tracked_persons_pub.publish(ids=["B"])
-        self.wait()
+        self.wait(delay=0.1)
         self.assertEquals(len(hri_listener.tracked_persons), 1)
         self.assertIn("B", hri_listener.tracked_persons)
         self.assertEquals(hri_listener.tracked_persons["B"].id, "B")
@@ -280,9 +287,12 @@ class TestHRI(unittest.TestCase):
         self.wait()
         self.assertEquals(len(hri_listener.tracked_persons), 0)
 
+        hri_listener.close()
+
     def test_person_attributes(self):
 
         hri_listener = hri.HRIListener()
+        self.wait()
 
         person_face_pub = rospy.Publisher(
             "/humans/persons/p1/face_id", String, queue_size=1, latch=True
@@ -290,8 +300,9 @@ class TestHRI(unittest.TestCase):
 
         self.tracked_persons_pub.publish(ids=["p1"])
         self.faces_pub.publish(ids=["f1", "f2"])
-        self.wait()
+        self.wait(delay=0.1)
 
+        self.assertIn("p1", hri_listener.tracked_persons)
         p1 = hri_listener.tracked_persons["p1"]
 
         self.assertFalse(
@@ -306,6 +317,8 @@ class TestHRI(unittest.TestCase):
         self.assertIsNotNone(p1.face)
 
         self.assertEquals(p1.face.id, "f1")
+
+        hri_listener.close()
 
 
 if __name__ == "__main__":
