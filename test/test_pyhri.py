@@ -312,7 +312,7 @@ class TestHRI(unittest.TestCase):
         self.assertIsNone(p1.face)
 
         person_face_pub.publish(data="f1")
-        self.wait()
+        self.wait(delay=0.1)
 
         self.assertIsNotNone(p1.face)
 
