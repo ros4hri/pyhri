@@ -178,12 +178,12 @@ class HRIListener:
     # currently actively detected (eg, seen). The persons are mapped to their
     # IDs.
     #
-    # Persons are returned as constant std::weak_ptr: while person do *not*
-    # disappear in general, *anonymous* persons (created because, eg, a face has
-    # been detected, and we can infer a yet-to-be-recognised person does exist)
-    # can disappear.
+    # While person do *not* disappear in general, *anonymous* persons (created
+    # because, eg, a face has been detected, and we can infer a
+    # yet-to-be-recognised person does exist) can disappear.  Use the `valid()`
+    # method to ensure the person still exists.
     def get_persons(self) -> Mapping[str, Person]:
-        return self.known_persons
+        return self.known_persons.copy()
 
     # Registers a callback function, to be invoked everytime a new person
     # is detected.
@@ -201,8 +201,9 @@ class HRIListener:
     # Note that, while person do *not* disappear in general, *anonymous*
     # persons (created because, eg, a face has been detected, and we can infer
     # a yet-to-be-recognised person does exist) can disappear.
+    # Use the `valid()` method to ensure the person still exists.
     def get_tracked_persons(self) -> Mapping[str, Person]:
-        return self.tracked_persons
+        return self.tracked_persons.copy()
 
     # Registers a callback function, to be invoked everytime a new person
     # is detected and actively tracked (eg, currently seen).

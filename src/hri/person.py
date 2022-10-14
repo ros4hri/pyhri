@@ -17,6 +17,8 @@ class Person:
         self.ns = "/humans/persons/" + id
         self.frame = "person_" + id
 
+        self._valid = True
+
         # these 3 member variables are set when the Person instance is constructed in hri.py
         self.faces_ = {}
         self.bodies_ = {}
@@ -76,6 +78,12 @@ class Person:
         self.engagement_sub.unregister()
         self.loc_confidence_sub.unregister()
 
+    def valid(self) -> bool:
+        """Returns True if this person still exists (and thus is valid).
+        If False, methods like `Person.transform` will raise an exception.
+        """
+        return self._valid
+
     def on_face_id(self, msg):
         if msg.data and msg.data in self.faces_:
             self.face_id = msg.data
@@ -111,15 +119,6 @@ class Person:
 
     def on_loc_confidence(self, msg):
         self.loc_confidence = msg.data
-
-    def face(self):
-        pass
-
-    def body(self):
-        pass
-
-    def voice(self):
-        pass
 
     def engagement_level(self):
         if self.engagement_status is None:

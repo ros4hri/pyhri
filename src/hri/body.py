@@ -13,6 +13,8 @@ class Body:
         self.id = id
         self.ns = "/humans/bodies/" + id
 
+        self._valid = True
+
         self.roi: Optional[Rect] = None
         self.cropped: Optional[npt.ArrayLike] = None
 
@@ -30,11 +32,20 @@ class Body:
         self.roi_sub.unregister()
         self.cropped_sub.unregister()
 
+    def valid(self) -> bool:
+        """Returns True if this body is still detected (and thus is valid).
+        If False, methods like `Body.transform` will raise an exception.
+        """
+        return self._valid
+
     def on_roi(self, msg):
         self.roi = Rect(msg.x_offset, msg.y_offset, msg.width, msg.height)
 
     def on_cropped(self, msg):
         self.cropped = self.cv_bridge.imgmsg_to_cv2(msg, desired_encoding="passthrough")
+
+    def transform(self):
+        raise NotImplementedError("method not yet implemented")
 
     def __str__(self):
         return self.id

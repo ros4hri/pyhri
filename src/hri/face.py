@@ -27,6 +27,8 @@ class Face:
         self.frame = "face_" + id
         self.gaze_frame = "gaze_" + id
 
+        self._valid = True
+
         self.roi: Optional[Rect] = None
         self.cropped: Optional[npt.ArrayLike] = None
         self.aligned: Optional[npt.ArrayLike] = None
@@ -64,6 +66,12 @@ class Face:
         self.aligned_sub.unregister()
         self.landmarks_sub.unregister()
         self.softbiometrics_sub.unregister()
+
+    def valid(self) -> bool:
+        """Returns True if this face still exists (and thus is valid).
+        If False, methods like `Face.transform` will raise an exception.
+        """
+        return self._valid
 
     def on_roi(self, msg):
         self.roi = Rect(msg.x_offset, msg.y_offset, msg.width, msg.height)
