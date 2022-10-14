@@ -11,7 +11,7 @@ class Voice:
         rospy.logdebug("New voice detected: " + self.ns)
 
     def close(self):
-        pass
+        self._valid = False
 
     def valid(self) -> bool:
         """Returns True if this voice still exists (and thus is valid).

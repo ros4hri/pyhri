@@ -61,6 +61,7 @@ class Face:
         )
 
     def close(self):
+        self._valid = False
         self.roi_sub.unregister()
         self.cropped_sub.unregister()
         self.aligned_sub.unregister()

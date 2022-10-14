@@ -70,6 +70,7 @@ class Person:
         )
 
     def close(self):
+        self._valid = False
         self.face_id_sub.unregister()
         self.body_id_sub.unregister()
         self.voice_id_sub.unregister()
