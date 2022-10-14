@@ -5,6 +5,11 @@ import rospy
 from sensor_msgs.msg import RegionOfInterest, Image
 from hri_msgs.msg import FacialLandmarks, SoftBiometrics
 from cv_bridge import CvBridge
+from geometry_msgs.msg import TransformStamped
+
+from tf2_ros import LookupException
+
+FACE_TF_TIMEOUT = rospy.Duration(0.01)
 
 
 class Rect:
@@ -19,6 +24,8 @@ class Face:
     def __init__(self, id, tf_buffer, reference_frame):
         self.id = id
         self.ns = "/humans/faces/" + id
+        self.frame = "person_" + id
+        self.gaze_frame = "gaze_" + id
 
         self.roi: Optional[Rect] = None
         self.cropped: Optional[npt.ArrayLike] = None
@@ -27,6 +34,9 @@ class Face:
         self.softbiometrics: Optional[SoftBiometrics] = None
 
         self.cv_bridge = CvBridge()
+
+        self._tf_buffer = tf_buffer
+        self._reference_frame = reference_frame
 
         rospy.logdebug("New face detected: " + self.ns)
 
@@ -69,6 +79,42 @@ class Face:
 
     def on_softbiometrics(self, msg):
         self.softbiometrics = msg
+
+    def transform(self):
+
+        try:
+            return self._tf_buffer.lookupTransform(
+                self._reference_frame, self.frame, rospy.Time(0), FACE_TF_TIMEOUT
+            )
+
+        except LookupException:
+            rospy.logwarn(
+                "failed to transform face frame "
+                + self.frame
+                + " to "
+                + self._reference_frame
+                + ". Are the frames published?"
+            )
+
+            return TransformStamped()
+
+    def gaze_transform(self):
+
+        try:
+            return self._tf_buffer.lookupTransform(
+                self._reference_frame, self.gaze_frame, rospy.Time(0), FACE_TF_TIMEOUT
+            )
+
+        except LookupException:
+            rospy.logwarn(
+                "failed to transform gaze frame "
+                + self.frame
+                + " to "
+                + self._reference_frame
+                + ". Are the frames published?"
+            )
+
+            return TransformStamped()
 
     def __str__(self):
         return self.id
