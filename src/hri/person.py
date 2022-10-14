@@ -107,7 +107,7 @@ class Person:
         self.alias = msg.data
 
     def on_engagement_status(self, msg):
-        self.engagement_status = msg.data
+        self.engagement_status = msg.level
 
     def on_loc_confidence(self, msg):
         self.loc_confidence = msg.data
