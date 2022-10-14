@@ -132,7 +132,7 @@ class Person:
             return TransformStamped()
 
         try:
-            return self._tf_buffer.lookupTransform(
+            return self._tf_buffer.lookup_transform(
                 self._reference_frame, self.frame, rospy.Time(0), PERSON_TF_TIMEOUT
             )
 

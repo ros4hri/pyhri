@@ -24,7 +24,7 @@ class Face:
     def __init__(self, id, tf_buffer, reference_frame):
         self.id = id
         self.ns = "/humans/faces/" + id
-        self.frame = "person_" + id
+        self.frame = "face_" + id
         self.gaze_frame = "gaze_" + id
 
         self.roi: Optional[Rect] = None
@@ -83,7 +83,7 @@ class Face:
     def transform(self):
 
         try:
-            return self._tf_buffer.lookupTransform(
+            return self._tf_buffer.lookup_transform(
                 self._reference_frame, self.frame, rospy.Time(0), FACE_TF_TIMEOUT
             )
 
@@ -101,7 +101,7 @@ class Face:
     def gaze_transform(self):
 
         try:
-            return self._tf_buffer.lookupTransform(
+            return self._tf_buffer.lookup_transform(
                 self._reference_frame, self.gaze_frame, rospy.Time(0), FACE_TF_TIMEOUT
             )
 
