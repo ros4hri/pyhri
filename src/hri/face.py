@@ -1,14 +1,19 @@
 from typing import Optional
 
-import rospy
-from sensor_msgs.msg import RegionOfInterest, Image
-from hri_msgs.msg import FacialLandmarks, SoftBiometrics
-from cv_bridge import CvBridge
-from geometry_msgs.msg import TransformStamped
+try:
+    import rospy
+    from sensor_msgs.msg import RegionOfInterest, Image
+    from hri_msgs.msg import FacialLandmarks, SoftBiometrics
+    from cv_bridge import CvBridge
+    from geometry_msgs.msg import TransformStamped
 
-from tf2_ros import LookupException
+    from tf2_ros import LookupException
 
-FACE_TF_TIMEOUT = rospy.Duration(0.01)
+    FACE_TF_TIMEOUT = rospy.Duration(0.01)
+except ImportError:
+    print(
+        "Importing pyhri without rospy! This won't work (except for generating documentation)"
+    )
 
 
 class Rect:

@@ -1,14 +1,18 @@
 from typing import Optional
 
-import rospy
-from std_msgs.msg import String, Bool, Float32
-from hri_msgs.msg import EngagementLevel
-from geometry_msgs.msg import TransformStamped
+try:
+    import rospy
+    from std_msgs.msg import String, Bool, Float32
+    from hri_msgs.msg import EngagementLevel
+    from geometry_msgs.msg import TransformStamped
 
-from tf2_ros import LookupException
+    from tf2_ros import LookupException
 
-
-PERSON_TF_TIMEOUT = rospy.Duration(0.01)
+    PERSON_TF_TIMEOUT = rospy.Duration(0.01)
+except ImportError:
+    print(
+        "Importing pyhri without rospy! This won't work (except for generating documentation)"
+    )
 
 
 class Person:

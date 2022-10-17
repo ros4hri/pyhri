@@ -28,15 +28,24 @@
 
 from typing import Mapping
 
-import rospy
 
 from .body import Body
 from .face import Face
 from .voice import Voice
 from .person import Person
-from hri_msgs.msg import IdsList
 
-from tf2_ros import Buffer, TransformListener
+try:
+    import rospy
+    from hri_msgs.msg import IdsList
+    from tf2_ros import Buffer, TransformListener
+except ImportError:
+
+    class IdsList:
+        pass
+
+    print(
+        "Importing pyhri without rospy! This won't work (except for generating documentation)"
+    )
 
 
 class HRIListener:

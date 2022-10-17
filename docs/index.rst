@@ -43,11 +43,13 @@ API
 
 .. autosummary::
    :toctree: generated
+   :recursive:
 
-   hri.Person
-   hri.Face
-   hri.Body
-   hri.Voice
+   hri.hri
+   hri.person
+   hri.face
+   hri.body
+   hri.voice
 
 Indices and tables
 ==================

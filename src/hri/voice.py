@@ -1,4 +1,9 @@
-import rospy
+try:
+    import rospy
+except ImportError:
+    print(
+        "Importing pyhri without rospy! This won't work (except for generating documentation)"
+    )
 
 
 class Voice:

@@ -1,8 +1,14 @@
 from typing import Optional
 
-import rospy
-from sensor_msgs.msg import RegionOfInterest, Image
-from cv_bridge import CvBridge
+try:
+    import rospy
+    from sensor_msgs.msg import RegionOfInterest, Image
+    from cv_bridge import CvBridge
+except ImportError:
+    print(
+        "Importing pyhri without rospy! This won't work (except for generating documentation)"
+    )
+
 
 from .face import Rect
 
