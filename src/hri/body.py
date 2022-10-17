@@ -1,5 +1,4 @@
 from typing import Optional
-import numpy.typing as npt
 
 import rospy
 from sensor_msgs.msg import RegionOfInterest, Image
@@ -16,7 +15,7 @@ class Body:
         self._valid = True
 
         self.roi: Optional[Rect] = None
-        self.cropped: Optional[npt.ArrayLike] = None
+        self.cropped = None
 
         self.cv_bridge = CvBridge()
 

@@ -1,5 +1,4 @@
 from typing import Optional
-import numpy.typing as npt
 
 import rospy
 from sensor_msgs.msg import RegionOfInterest, Image
@@ -30,8 +29,8 @@ class Face:
         self._valid = True
 
         self.roi: Optional[Rect] = None
-        self.cropped: Optional[npt.ArrayLike] = None
-        self.aligned: Optional[npt.ArrayLike] = None
+        self.cropped = None
+        self.aligned = None
         self.landmarks: Optional[FacialLandmarks] = None
         self.softbiometrics: Optional[SoftBiometrics] = None
 
