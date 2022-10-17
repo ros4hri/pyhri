@@ -1,7 +1,15 @@
+[![Documentation Status](https://readthedocs.org/projects/pyhri/badge/?version=latest)](https://pyhri.readthedocs.io/en/latest/?badge=latest)
+
 pyhri: Python wrapper for the ROS4HRI framework
 ===============================================
 
-Example usage:
+Documentation
+-------------
+
+API Documentation: https://pyhri.readthedocs.io
+
+Example usage
+-------------
 
 ```python
 import rospy
