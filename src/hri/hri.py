@@ -49,6 +49,8 @@ except ImportError:
 
 
 class HRIListener:
+    """Main entry point to pyhri."""
+
     def __init__(self, reference_frame="base_link"):
 
         self.feature_subscribers_ = {}

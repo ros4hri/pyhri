@@ -4,7 +4,16 @@ pyhri
 `pyhri` is a Python wrapper for the ROS4HRI framework. It implements the `ROS
 REP-155 <https://www.ros.org/reps/rep-0155.html>`_.
 
-Example:
+.. attention::
+
+  Until it reaches version 1.0, `pyhri` is not complete, and does not cover the
+  whole REP-155 specification!
+
+  `Pull requests <https://github.com/ros4hri/pyhri>`_ to implement more of REP-155 are very welcome.
+
+
+Usage example
+-------------
 
 .. code:: python
 
@@ -34,6 +43,13 @@ Example:
     
     rospy.sleep(1)
 
+
+
+.. note::
+
+    Check `libhri <https://github.com/ros4hri/libhri>`_ for the C++ equivalent to `pyhri`.
+
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
@@ -45,11 +61,11 @@ API
    :toctree: generated
    :recursive:
 
-   hri.hri
-   hri.person
-   hri.face
-   hri.body
-   hri.voice
+   hri.hri.HRIListener
+   hri.person.Person
+   hri.face.Face
+   hri.body.Body
+   hri.voice.Voice
 
 Indices and tables
 ==================

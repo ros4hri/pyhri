@@ -14,6 +14,8 @@ from .face import Rect
 
 
 class Body:
+    """Represents a detected body."""
+
     def __init__(self, id, tf_buffer, reference_frame):
         self.id = id
         self.ns = "/humans/bodies/" + id

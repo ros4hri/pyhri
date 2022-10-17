@@ -16,10 +16,16 @@ except ImportError:
 
 
 class Person:
+    """Represents a known person (that can be currently tracked or not).
+
+    A :class:`Person` instance gives access to its corresponding :class:`Face`,
+    :class:`Body` and :class:`Voice` if available.
+    """
+
     def __init__(self, id, tf_buffer, reference_frame):
-        self.id = id
-        self.ns = "/humans/persons/" + id
-        self.frame = "person_" + id
+        self.id = id  #: the person ID
+        self.ns = "/humans/persons/" + id  #: the person namespace
+        self.frame = "person_" + id  #: the TF frame of the person
 
         self._valid = True
 
@@ -31,16 +37,26 @@ class Person:
         from . import Face, Body, Voice
 
         self.face_id: Optional[str] = None
-        self.face: Optional[Face] = None
+        self.face: Optional[
+            Face
+        ] = None  #: access to the person's face (:class:`Face` instance), if available
         self.body_id: Optional[str] = None
-        self.body: Optional[Body] = None
+        self.body: Optional[
+            Body
+        ] = None  #: access to the person's body (:class:`Body` instance), if available
         self.voice_id: Optional[str] = None
-        self.voice: Optional[Voice] = None
+        self.voice: Optional[
+            Voice
+        ] = None  #: access to the person's voice (:class:`Voice` instance), if available
 
-        self.anonymous: bool = False
-        self.engagement_status: Optional[EngagementLevel] = None
-        self.alias: Optional[str] = None
-        self.loc_confidence: float = 0.0
+        self.anonymous: bool = False  #: whether or not this person is anonymous
+        self.engagement_status: Optional[
+            EngagementLevel
+        ] = None  #: current estimated level of engagement
+        self.alias: Optional[
+            str
+        ] = None  #: if non-null, the person this person is an alias of
+        self.loc_confidence: float = 0.0  #: level of confidence of the person's location (0.0: no confidence, 1.0: person currently seen)
 
         self._tf_buffer = tf_buffer
         self._reference_frame = reference_frame

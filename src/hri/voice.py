@@ -7,6 +7,8 @@ except ImportError:
 
 
 class Voice:
+    """Represents a detected voice."""
+
     def __init__(self, id, tf_buffer, reference_frame):
         self.id = id
         self.ns = "/humans/voices/" + id
