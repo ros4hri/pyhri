@@ -88,11 +88,17 @@ class Face:
     def on_softbiometrics(self, msg):
         self.softbiometrics = msg
 
-    def transform(self):
+    def transform(self, from_frame=None):
+        """Returns a ROS TransformStamped of the face, from the `from_frame` reference basis.
+        If `from_frame` is not provided, uses the default `reference_frame` (usually `base_link`).
+        """
+
+        if from_frame is None:
+            from_frame = self._reference_frame
 
         try:
             return self._tf_buffer.lookup_transform(
-                self._reference_frame, self.frame, rospy.Time(0), FACE_TF_TIMEOUT
+                from_frame, self.frame, rospy.Time(0), FACE_TF_TIMEOUT
             )
 
         except LookupException:
@@ -100,25 +106,31 @@ class Face:
                 "failed to transform face frame "
                 + self.frame
                 + " to "
-                + self._reference_frame
+                + from_frame
                 + ". Are the frames published?"
             )
 
             return TransformStamped()
 
-    def gaze_transform(self):
+    def gaze_transform(self, from_frame=None):
+        """Returns a ROS TransformStamped of the face's gaze, from the `from_frame` reference basis.
+        If `from_frame` is not provided, uses the default `reference_frame` (usually `base_link`).
+        """
+
+        if from_frame is None:
+            from_frame = self._reference_frame
 
         try:
             return self._tf_buffer.lookup_transform(
-                self._reference_frame, self.gaze_frame, rospy.Time(0), FACE_TF_TIMEOUT
+                from_frame, self.gaze_frame, rospy.Time(0), FACE_TF_TIMEOUT
             )
 
         except LookupException:
             rospy.logwarn(
                 "failed to transform gaze frame "
-                + self.frame
+                + self.gaze_frame
                 + " to "
-                + self._reference_frame
+                + from_frame
                 + ". Are the frames published?"
             )
 
