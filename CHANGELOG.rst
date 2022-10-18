@@ -2,6 +2,24 @@
 Changelog for package pyhri
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* autogenerate docs with rosdoc (for display on ROS wiki) and SPHINX
+* More api documentation
+* adjust code base for ReadTheDocs doc generation
+  In particular:
+  - add a requirements.txt file for catkin
+  - allows importing pyhri without rospy
+* Face.transform|Face.gaze_transform can change their reference frame
+* removed dep on numpy.typing as it is not widely available yet
+* mark features as invalid once they disappear
+* returns copy of persons to avoid modifying dictionary while iterating
+  While here, add infrastrcutre to check whether a face/body/voice/person is still valid
+* expose the tf transform of the face and gaze
+* add BSD license file
+* [test] further tuning of tests' waiting behaviours for #1
+* Contributors: Séverin Lemaignan
+
 0.1.3 (2022-07-13)
 ------------------
 * refining waiting + closing in tests -- they all pass reliably on my machine
