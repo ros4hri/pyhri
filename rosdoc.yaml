@@ -1,0 +1,3 @@
+- builder: sphinx
+  name: pyhri - Python API to ROS4HRI
+  sphinx_root_dir: docs
