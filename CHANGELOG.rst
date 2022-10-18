@@ -2,8 +2,8 @@
 Changelog for package pyhri
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.2.0 (2022-10-18)
+------------------
 * autogenerate docs with rosdoc (for display on ROS wiki) and SPHINX
 * More api documentation
 * adjust code base for ReadTheDocs doc generation
