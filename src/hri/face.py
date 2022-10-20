@@ -30,8 +30,12 @@ from typing import Optional
 
 try:
     import rospy
-    from sensor_msgs.msg import RegionOfInterest, Image
-    from hri_msgs.msg import FacialLandmarks, SoftBiometrics
+    from sensor_msgs.msg import Image
+    from hri_msgs.msg import (
+        NormalizedPointOfInterest2D,
+        FacialLandmarks,
+        SoftBiometrics,
+    )
     from cv_bridge import CvBridge
     from geometry_msgs.msg import TransformStamped
 
@@ -56,51 +60,61 @@ class Face:
     """Represents a detected face."""
 
     def __init__(self, id, tf_buffer, reference_frame):
-        self.id = id
-        self.ns = "/humans/faces/" + id
-        self.frame = "face_" + id
-        self.gaze_frame = "gaze_" + id
+        self.id = id  #: the face ID
+        self.ns = "/humans/faces/" + id  #: the full namespace of the face
+        self.frame = "face_" + id  #: the face tf frame name
+        self.gaze_frame = "gaze_" + id  #: the corresponding gaze tf frame name
 
         self._valid = True
 
-        self.roi: Optional[Rect] = None
-        self.cropped = None
-        self.aligned = None
-        self.landmarks: Optional[FacialLandmarks] = None
-        self.softbiometrics: Optional[SoftBiometrics] = None
+        self.roi: Optional[
+            Rect
+        ] = None  #: the face's region of interest (normalised between 0. and 1.) in the source image, if available
+        self.cropped = (
+            None  #: the cropped face image, as an OpenCV/numpy array, if available
+        )
+        self.aligned = None  #: the cropped and aligned (eg, the two eyes are aligned horizontally) face image, as an OpenCV/numpy array, if available
+        self.landmarks: Optional[
+            FacialLandmarks
+        ] = None  #: extracted facial landmarks, as a `hri_msgs/FacialLnadmark object <http://docs.ros.org/en/api/hri_msgs/html/msg/FacialLandmarks.html>`_, if available
+        self.softbiometrics: Optional[
+            SoftBiometrics
+        ] = None  #: estimated 'soft biometrics' (eg age, gender) of the face, as a `hri_msgs/SoftBiometrics object <http://docs.ros.org/en/api/hri_msgs/html/msg/SoftBiometrics.html>`_, if available
 
-        self.cv_bridge = CvBridge()
+        self._cv_bridge = CvBridge()
 
         self._tf_buffer = tf_buffer
         self._reference_frame = reference_frame
 
         rospy.logdebug("New face detected: " + self.ns)
 
-        self.roi_sub = rospy.Subscriber(self.ns + "/roi", RegionOfInterest, self.on_roi)
-
-        self.cropped_sub = rospy.Subscriber(
-            self.ns + "/cropped", Image, self.on_cropped
+        self._roi_sub = rospy.Subscriber(
+            self.ns + "/roi", NormalizedPointOfInterest2D, self._on_roi
         )
 
-        self.aligned_sub = rospy.Subscriber(
-            self.ns + "/aligned", Image, self.on_aligned
+        self._cropped_sub = rospy.Subscriber(
+            self.ns + "/cropped", Image, self._on_cropped
         )
 
-        self.landmarks_sub = rospy.Subscriber(
-            self.ns + "/landmarks", FacialLandmarks, self.on_landmarks
+        self._aligned_sub = rospy.Subscriber(
+            self.ns + "/aligned", Image, self._on_aligned
         )
 
-        self.softbiometrics_sub = rospy.Subscriber(
-            self.ns + "/softbiometrics", SoftBiometrics, self.on_softbiometrics
+        self._landmarks_sub = rospy.Subscriber(
+            self.ns + "/landmarks", FacialLandmarks, self._on_landmarks
+        )
+
+        self._softbiometrics_sub = rospy.Subscriber(
+            self.ns + "/softbiometrics", SoftBiometrics, self._on_softbiometrics
         )
 
     def close(self):
         self._valid = False
-        self.roi_sub.unregister()
-        self.cropped_sub.unregister()
-        self.aligned_sub.unregister()
-        self.landmarks_sub.unregister()
-        self.softbiometrics_sub.unregister()
+        self._roi_sub.unregister()
+        self._cropped_sub.unregister()
+        self._aligned_sub.unregister()
+        self._landmarks_sub.unregister()
+        self._softbiometrics_sub.unregister()
 
     def valid(self) -> bool:
         """Returns True if this face still exists (and thus is valid).
@@ -108,19 +122,23 @@ class Face:
         """
         return self._valid
 
-    def on_roi(self, msg):
+    def _on_roi(self, msg):
         self.roi = Rect(msg.x_offset, msg.y_offset, msg.width, msg.height)
 
-    def on_cropped(self, msg):
-        self.cropped = self.cv_bridge.imgmsg_to_cv2(msg, desired_encoding="passthrough")
+    def _on_cropped(self, msg):
+        self.cropped = self._cv_bridge.imgmsg_to_cv2(
+            msg, desired_encoding="passthrough"
+        )
 
-    def on_aligned(self, msg):
-        self.aligned = self.cv_bridge.imgmsg_to_cv2(msg, desired_encoding="passthrough")
+    def _on_aligned(self, msg):
+        self.aligned = self._cv_bridge.imgmsg_to_cv2(
+            msg, desired_encoding="passthrough"
+        )
 
-    def on_landmarks(self, msg):
+    def _on_landmarks(self, msg):
         self.landmarks = msg
 
-    def on_softbiometrics(self, msg):
+    def _on_softbiometrics(self, msg):
         self.softbiometrics = msg
 
     def transform(self, from_frame=None):
