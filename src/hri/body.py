@@ -30,8 +30,14 @@ from typing import Optional
 
 try:
     import rospy
-    from sensor_msgs.msg import RegionOfInterest, Image
+    from sensor_msgs.msg import Image
+    from hri_msgs.msg import NormalizedPointOfInterest2D, Skeleton2D
     from cv_bridge import CvBridge
+    from geometry_msgs.msg import TransformStamped
+
+    from tf2_ros import LookupException
+
+    BODY_TF_TIMEOUT = rospy.Duration(0.01)
 except ImportError:
     print(
         "Importing pyhri without rospy! This won't work (except for generating documentation)"
@@ -45,28 +51,47 @@ class Body:
     """Represents a detected body."""
 
     def __init__(self, id, tf_buffer, reference_frame):
-        self.id = id
-        self.ns = "/humans/bodies/" + id
+        self.id = id  #: the body ID
+        self.ns = "/humans/bodies/" + id  #: the full namespace of the body
+        self.frame = "body_" + id  #: the body tf frame name
 
         self._valid = True
 
-        self.roi: Optional[Rect] = None
-        self.cropped = None
+        self.roi: Optional[
+            Rect
+        ] = None  #: the face's region of interest (normalised between 0. and 1.) in the source image, if available
+        self.cropped = (
+            None  #: the cropped face image, as an OpenCV/numpy array, if available
+        )
 
-        self.cv_bridge = CvBridge()
+        self.skeleton2d: Optional[
+            Skeleton2D
+        ] = None  #: extracted 2D skeleton, as a `hri_msgs/Skeleton2D object <http://docs.ros.org/en/api/hri_msgs/html/msg/Skeleton2D.html>`_, if available
+
+        self._cv_bridge = CvBridge()
+
+        self._tf_buffer = tf_buffer
+        self._reference_frame = reference_frame
 
         rospy.logdebug("New body detected: " + self.ns)
 
-        self.roi_sub = rospy.Subscriber(self.ns + "/roi", RegionOfInterest, self.on_roi)
+        self._roi_sub = rospy.Subscriber(
+            self.ns + "/roi", NormalizedPointOfInterest2D, self._on_roi
+        )
 
-        self.cropped_sub = rospy.Subscriber(
-            self.ns + "/cropped", Image, self.on_cropped
+        self._cropped_sub = rospy.Subscriber(
+            self.ns + "/cropped", Image, self._on_cropped
+        )
+
+        self._skeleton2d_sub = rospy.Subscriber(
+            self.ns + "/skeleton2d", Skeleton2D, self._on_skeleton2d
         )
 
     def close(self):
         self._valid = False
-        self.roi_sub.unregister()
-        self.cropped_sub.unregister()
+        self._roi_sub.unregister()
+        self._cropped_sub.unregister()
+        self._skeleton2d_sub.unregister()
 
     def valid(self) -> bool:
         """Returns True if this body is still detected (and thus is valid).
@@ -74,14 +99,40 @@ class Body:
         """
         return self._valid
 
-    def on_roi(self, msg):
+    def _on_roi(self, msg):
         self.roi = Rect(msg.x_offset, msg.y_offset, msg.width, msg.height)
 
-    def on_cropped(self, msg):
-        self.cropped = self.cv_bridge.imgmsg_to_cv2(msg, desired_encoding="passthrough")
+    def _on_cropped(self, msg):
+        self.cropped = self._cv_bridge.imgmsg_to_cv2(
+            msg, desired_encoding="passthrough"
+        )
 
-    def transform(self):
-        raise NotImplementedError("method not yet implemented")
+    def _on_skeleton2d(self, msg):
+        self.skeleton2d = msg
+
+    def transform(self, from_frame=None):
+        """Returns a ROS TransformStamped of the body, from the `from_frame` reference basis.
+        If `from_frame` is not provided, uses the default `reference_frame` (usually `base_link`).
+        """
+
+        if from_frame is None:
+            from_frame = self._reference_frame
+
+        try:
+            return self._tf_buffer.lookup_transform(
+                from_frame, self.frame, rospy.Time(0), BODY_TF_TIMEOUT
+            )
+
+        except LookupException:
+            rospy.logwarn(
+                "failed to transform body frame "
+                + self.frame
+                + " to "
+                + from_frame
+                + ". Are the frames published?"
+            )
+
+            return TransformStamped()
 
     def __str__(self):
         return self.id
