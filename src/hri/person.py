@@ -127,6 +127,7 @@ class Person:
         self.engagement_sub.unregister()
         self.loc_confidence_sub.unregister()
 
+    @property
     def valid(self) -> bool:
         """Returns True if this person still exists (and thus is valid).
         If False, methods like `Person.transform` will raise an exception.

@@ -93,9 +93,10 @@ class Body:
         self._cropped_sub.unregister()
         self._skeleton2d_sub.unregister()
 
+    @property
     def valid(self) -> bool:
-        """Returns True if this body is still detected (and thus is valid).
-        If False, methods like `Body.transform` will raise an exception.
+        """Returns `True` if this body is still detected (and thus is valid).
+        If `False`, methods like `Body.transform` will raise an exception.
         """
         return self._valid
 

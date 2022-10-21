@@ -116,9 +116,10 @@ class Face:
         self._landmarks_sub.unregister()
         self._softbiometrics_sub.unregister()
 
+    @property
     def valid(self) -> bool:
-        """Returns True if this face still exists (and thus is valid).
-        If False, methods like `Face.transform` will raise an exception.
+        """Returns `True` if this face still exists (and thus is valid).
+        If `False`, methods like `Face.transform` will raise an exception.
         """
         return self._valid
 

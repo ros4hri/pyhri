@@ -55,26 +55,26 @@ class HRIListener:
 
         self.feature_subscribers_ = {}
 
-        self.faces: Mapping[str, Face] = {}
+        self._faces: Mapping[str, Face] = {}
         self.face_callbacks = []
         self.face_lost_callbacks = []
 
-        self.bodies: Mapping[str, Body] = {}
+        self._bodies: Mapping[str, Body] = {}
 
         self.body_callbacks = []
         self.body_lost_callbacks = []
 
-        self.voices: Mapping[str, Voice] = {}
+        self._voices: Mapping[str, Voice] = {}
 
         self.voice_callbacks = []
         self.voice_lost_callbacks = []
 
-        self.tracked_persons: Mapping[str, Person] = {}
+        self._tracked_persons: Mapping[str, Person] = {}
 
         self.person_tracked_callbacks = []
         self.person_tracked_lost_callbacks = []
 
-        self.known_persons: Mapping[str, Person] = {}
+        self._known_persons: Mapping[str, Person] = {}
 
         self.known_person_callbacks = []
         self.known_person_lost_callbacks = []
@@ -141,27 +141,32 @@ class HRIListener:
 
     def _on_tracked_faces(self, tracked: IdsList):
 
-        self._update_trackers(self.faces, Face, tracked.ids)
+        self._update_trackers(self._faces, Face, tracked.ids)
 
     def _on_tracked_bodies(self, tracked: IdsList):
 
-        self._update_trackers(self.bodies, Body, tracked.ids)
+        self._update_trackers(self._bodies, Body, tracked.ids)
 
     def _on_tracked_voices(self, tracked: IdsList):
 
-        self._update_trackers(self.voices, Voice, tracked.ids)
+        self._update_trackers(self._voices, Voice, tracked.ids)
 
     def _on_tracked_persons(self, tracked: IdsList):
 
-        self._update_trackers(self.tracked_persons, Person, tracked.ids)
+        self._update_trackers(self._tracked_persons, Person, tracked.ids)
 
     def _on_known_persons(self, tracked: IdsList):
 
-        self._update_trackers(self.known_persons, Person, tracked.ids)
+        self._update_trackers(self._known_persons, Person, tracked.ids)
 
-    def get_faces(self) -> Mapping[str, Face]:
-        """Returns the list of all currently tracked faces, mapped to their ID."""
-        return self.faces.copy()
+    @property
+    def faces(self) -> Mapping[str, Face]:
+        """Returns the list of all currently tracked faces, mapped to their ID.
+
+        As faces can 'disappear' at any time (eg if they not detected anymore), always check the
+        `valid` attribute of the returned `Face` instances before accessing them.
+        """
+        return self._faces.copy()
 
     def on_face(self, callback):
         """Registers a callback function, to be invoked everytime a new face
@@ -174,9 +179,14 @@ class HRIListener:
         """
         self.face_lost_callbacks.append((callback))
 
-    def get_bodies(self) -> Mapping[str, Body]:
-        """Returns the list of all currently tracked bodies, mapped to their ID."""
-        return self.bodies.copy()
+    @property
+    def bodies(self) -> Mapping[str, Body]:
+        """Returns the list of all currently tracked bodies, mapped to their ID.
+
+        As bodies can 'disappear' at any time (eg if they not detected anymore), always check the
+        `valid` attribute of the returned `Body` instances before accessing them.
+        """
+        return self._bodies.copy()
 
     def on_body(self, callback):
         """Registers a callback function, to be invoked everytime a new body
@@ -190,9 +200,14 @@ class HRIListener:
         """
         self.body_lost_callbacks.append((callback))
 
-    def get_voices(self) -> Mapping[str, Voice]:
-        """Returns the list of all currently 'tracked' voices, mapped to their ID."""
-        return self.voices.copy()
+    @property
+    def voices(self) -> Mapping[str, Voice]:
+        """Returns the list of all currently 'tracked' voices, mapped to their ID.
+
+        As voices can 'disappear' at any time (eg if they not heard anymore), always check the
+        `valid` attribute of the returned `Voice` instances before accessing them.
+        """
+        return self._voices.copy()
 
     def on_voice(self, callback):
         """Registers a callback function, to be invoked everytime a new voice
@@ -206,17 +221,18 @@ class HRIListener:
         """
         self.voice_lost_callbacks.append((callback))
 
-    def get_persons(self) -> Mapping[str, Person]:
+    @property
+    def known_persons(self) -> Mapping[str, Person]:
         """Returns the list of all known persons, whether or not they are
         currently actively detected (eg, seen). The persons are mapped to their
         IDs.
 
         While person do *not* disappear in general, *anonymous* persons (created
         because, eg, a face has been detected, and we can infer a
-        yet-to-be-recognised person does exist) can disappear.  Use the `valid()`
-        method to ensure the person still exists.
+        yet-to-be-recognised person does exist) can disappear.  Check the `valid`
+        attribute to ensure the person still exists.
         """
-        return self.known_persons.copy()
+        return self._known_persons.copy()
 
     def on_person(self, callback):
         """Registers a callback function, to be invoked everytime a new person
@@ -231,15 +247,16 @@ class HRIListener:
         """
         self.known_person_lost_callbacks.append((callback))
 
-    def get_tracked_persons(self) -> Mapping[str, Person]:
+    @property
+    def tracked_persons(self) -> Mapping[str, Person]:
         """Returns the list of currently detected persons, mapped to their IDs
 
         Note that, while person do *not* disappear in general, *anonymous*
         persons (created because, eg, a face has been detected, and we can infer
         a yet-to-be-recognised person does exist) can disappear.
-        Use the `valid()` method to ensure the person still exists.
+        Check the `valid` attribute to ensure the person still exists.
         """
-        return self.tracked_persons.copy()
+        return self._tracked_persons.copy()
 
     def on_tracked_person(self, callback):
         """Registers a callback function, to be invoked everytime a new person
@@ -253,7 +270,7 @@ class HRIListener:
         """
         self.person_tracked_lost_callbacks.append((callback))
 
-    def set_reference_frame(frame):
+    def set_reference_frame(self, frame):
         """Sets the reference frame from which the TF transformations of the persons will
         be returned (via `Person::transform()`).
 
