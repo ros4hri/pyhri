@@ -65,8 +65,8 @@ class Body:
         )
 
         self.skeleton2d: Optional[
-            Skeleton2D
-        ] = None  #: extracted 2D skeleton, as a `hri_msgs/Skeleton2D object <http://docs.ros.org/en/api/hri_msgs/html/msg/Skeleton2D.html>`_, if available
+            list
+        ] = None  #: extracted 2D skeleton coordinate, using indices defined in `hri_msgs/Skeleton2D object <http://docs.ros.org/en/api/hri_msgs/html/msg/Skeleton2D.html>`_, if available
 
         self._cv_bridge = CvBridge()
 
@@ -109,7 +109,7 @@ class Body:
         )
 
     def _on_skeleton2d(self, msg):
-        self.skeleton2d = msg
+        self.skeleton2d = msg.skeleton
 
     def transform(self, from_frame=None):
         """Returns a ROS TransformStamped of the body, from the `from_frame` reference basis.
