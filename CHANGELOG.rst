@@ -2,8 +2,8 @@
 Changelog for package pyhri
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.0 (2022-10-22)
+------------------
 * wire up callbacks for when features appear/disappear
 * body: currently, hri_fullbody (incorrectly) returns a RegionOfInterest for the RoI, instead of a NormalisedRegionOfInterest2D
 * body: skeleton2d now gives direct access to the list of joints coordinates
