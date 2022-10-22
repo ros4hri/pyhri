@@ -125,12 +125,40 @@ class HRIListener:
         to_remove = current_ids - new_ids
         to_add = new_ids - current_ids
 
+        new_cbs = []
+        lost_cbs = []
+
+        if tracker_class == Face:
+            new_cbs = self.face_callbacks
+            lost_cbs = self.face_lost_callbacks
+
+        elif tracker_class == Body:
+            new_cbs = self.body_callbacks
+            lost_cbs = self.body_lost_callbacks
+
+        elif tracker_class == Voice:
+            new_cbs = self.voice_callbacks
+            lost_cbs = self.voice_lost_callbacks
+
+        elif tracker == self._tracked_persons:
+            new_cbs = self.person_tracked_callbacks
+            lost_cbs = self.person_tracked_lost_callbacks
+
+        elif tracker == self._known_persons:
+            new_cbs = self.known_person_callbacks
+            lost_cbs = self.known_person_lost_callbacks
+
         for id in to_remove:
+            for cb in lost_cbs:
+                cb(id)
             tracker[id].close()
             del tracker[id]
 
         for id in to_add:
             tracker[id] = tracker_class(id, self._tf_buffer, self._reference_frame)
+
+            for cb in new_cbs:
+                cb(tracker[id])
 
             # Person's instance need access to the list of detect faces/bodies/voices
             # to return the right one
@@ -170,12 +198,17 @@ class HRIListener:
 
     def on_face(self, callback):
         """Registers a callback function, to be invoked everytime a new face
-        is detected."""
+        is detected.
+
+        The callback must accept one single parameter, the new `Face` instance.
+        """
         self.face_callbacks.append((callback))
 
     def on_face_lost(self, callback):
         """Registers a callback function, to be invoked everytime a
-        previously tracked face is lost (eg, not detected anymore)
+        previously tracked face is lost (eg, not detected anymore).
+
+        The callback must accept one single parameter, the id of the lost face.
         """
         self.face_lost_callbacks.append((callback))
 
@@ -191,12 +224,16 @@ class HRIListener:
     def on_body(self, callback):
         """Registers a callback function, to be invoked everytime a new body
         is detected.
+
+        The callback must accept one single parameter, the new `Body` instance.
         """
         self.body_callbacks.append((callback))
 
     def on_body_lost(self, callback):
         """Registers a callback function, to be invoked everytime a
         previously tracked body is lost (eg, not detected anymore)
+
+        The callback must accept one single parameter, the id of the lost body.
         """
         self.body_lost_callbacks.append((callback))
 
@@ -212,12 +249,16 @@ class HRIListener:
     def on_voice(self, callback):
         """Registers a callback function, to be invoked everytime a new voice
         is detected.
+
+        The callback must accept one single parameter, the new `Voice` instance.
         """
         self.voice_callbacks.append((callback))
 
     def on_voice_lost(self, callback):
         """Registers a callback function, to be invoked everytime a
         previously tracked voice is lost (eg, not detected anymore)
+
+        The callback must accept one single parameter, the id of the lost body.
         """
         self.voice_lost_callbacks.append((callback))
 
@@ -237,6 +278,8 @@ class HRIListener:
     def on_person(self, callback):
         """Registers a callback function, to be invoked everytime a new person
         is detected.
+
+        The callback must accept one single parameter, the new `Person` instance.
         """
         self.known_person_callbacks.append((callback))
 
@@ -244,6 +287,8 @@ class HRIListener:
         """Registers a callback function, to be invoked everytime a person
         is lost. This can *only* happen for anonymous persons. Identified persons
         will never be removed from the list of all known persons.
+
+        The callback must accept one single parameter, the id of the lost person.
         """
         self.known_person_lost_callbacks.append((callback))
 
@@ -261,12 +306,16 @@ class HRIListener:
     def on_tracked_person(self, callback):
         """Registers a callback function, to be invoked everytime a new person
         is detected and actively tracked (eg, currently seen).
+
+        The callback must accept one single parameter, the new `Person` instance.
         """
         self.person_tracked_callbacks.append((callback))
 
     def on_tracked_person_lost(self, callback):
         """Registers a callback function, to be invoked everytime a previously tracked
         person is lost.
+
+        The callback must accept one single parameter, the id of the lost person.
         """
         self.person_tracked_lost_callbacks.append((callback))
 
