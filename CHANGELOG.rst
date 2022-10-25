@@ -2,6 +2,13 @@
 Changelog for package pyhri
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* voice: add support for is_speaking
+* ensure known persons get their face/body/voice instances properly updated
+  Fixes #4
+* Contributors: Séverin Lemaignan
+
 0.3.0 (2022-10-22)
 ------------------
 * wire up callbacks for when features appear/disappear
