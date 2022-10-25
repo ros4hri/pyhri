@@ -2,8 +2,8 @@
 Changelog for package pyhri
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.2 (2022-10-25)
+------------------
 * fix RoI-related message types. Unit-tests pass again.
 * Contributors: Séverin Lemaignan
 
