@@ -32,6 +32,7 @@ try:
     import rospy
     from hri_msgs.msg import LiveSpeech
     from geometry_msgs.msg import TransformStamped
+    from std_msgs.msg import Bool
 
     from tf2_ros import LookupException
 
@@ -61,10 +62,18 @@ class Voice:
 
         self.speech: Optional[str] = None  #: last recognised speech, if available
 
+        self.is_speaking: Optional[
+            bool
+        ] = None  #: whether speech is detected for this voice
+
         rospy.logdebug("New voice detected: " + self.ns)
 
         self._speech_sub = rospy.Subscriber(
             self.ns + "/speech", LiveSpeech, self._on_speech
+        )
+
+        self._is_speaking_sub = rospy.Subscriber(
+            self.ns + "/is_speaking", Bool, self._on_is_speaking
         )
 
     def close(self):
@@ -80,6 +89,9 @@ class Voice:
     def _on_speech(self, msg):
         self.incremental_speech = msg.incremental
         self.speech = msg.final
+
+    def _on_is_speaking(self, msg):
+        self.is_speaking = msg.data
 
     def transform(self, from_frame=None):
         """Returns a ROS TransformStamped of the voice, from the `from_frame`
