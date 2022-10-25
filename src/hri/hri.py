@@ -163,9 +163,7 @@ class HRIListener:
             # Person's instance need access to the list of detect faces/bodies/voices
             # to return the right one
             if tracker_class == Person:
-                tracker[id].faces_ = self.faces
-                tracker[id].bodies_ = self.bodies
-                tracker[id].voices_ = self.voices
+                tracker[id]._hrilistener = self
 
     def _on_tracked_faces(self, tracked: IdsList):
 

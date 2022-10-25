@@ -57,10 +57,8 @@ class Person:
 
         self._valid = True
 
-        # these 3 member variables are set when the Person instance is constructed in hri.py
-        self.faces_ = {}
-        self.bodies_ = {}
-        self.voices_ = {}
+        # set in hri.py upon construction
+        self._hrilistener = None
 
         from . import Face, Body, Voice
 
@@ -135,25 +133,25 @@ class Person:
         return self._valid
 
     def on_face_id(self, msg):
-        if msg.data and msg.data in self.faces_:
+        if msg.data and msg.data in self._hrilistener._faces:
             self.face_id = msg.data
-            self.face = self.faces_[self.face_id]
+            self.face = self._hrilistener._faces[self.face_id]
         else:
             self.face_id = None
             self.face = None
 
     def on_body_id(self, msg):
-        if msg.data and msg.data in self.bodies_:
+        if msg.data and msg.data in self._hrilistener._bodies:
             self.body_id = msg.data
-            self.body = self.bodies_[self.body_id]
+            self.body = self._hrilistener._bodies[self.body_id]
         else:
             self.body_id = None
             self.body = None
 
     def on_voice_id(self, msg):
-        if msg.data and msg.data in self.voices_:
+        if msg.data and msg.data in self._hrilistener._voices:
             self.voice_id = msg.data
-            self.voice = self.voices_[self.voice_id]
+            self.voice = self._hrilistener._voices[self.voice_id]
         else:
             self.voice_id = None
             self.voice = None
