@@ -9,9 +9,8 @@ import unittest
 import rospy
 import rostest
 
-from sensor_msgs.msg import RegionOfInterest
-from hri_msgs.msg import IdsList
-from std_msgs.msg import String
+from hri_msgs.msg import IdsList, LiveSpeech, RegionOfInterest
+from std_msgs.msg import String, Bool
 
 import pyhri
 
@@ -20,6 +19,8 @@ class TestHRI(unittest.TestCase):
     def __init__(self, *args):
         super(TestHRI, self).__init__(*args)
         rospy.init_node(NAME, anonymous=True)
+
+        self.cb_triggered = False
 
         self.faces_pub = rospy.Publisher(
             "/humans/faces/tracked", IdsList, queue_size=1, latch=False
@@ -80,10 +81,10 @@ class TestHRI(unittest.TestCase):
         self.wait()
 
         roi_A_pub = rospy.Publisher(
-            "/humans/faces/A/roi", 
-            RegionOfInterest, 
-            queue_size=1, 
-            latch=True
+            "/humans/faces/A/roi",
+            RegionOfInterest,
+            queue_size=1,
+            latch=True,
         )
         roi_B_pub = rospy.Publisher(
             "/humans/faces/B/roi",
@@ -212,6 +213,64 @@ class TestHRI(unittest.TestCase):
         self.voices_pub.publish(ids=[])
         self.wait()
         self.assertEquals(len(hri_listener.voices), 0)
+
+        hri_listener.close()
+
+    def cb(self, msg):
+        self.cb_triggered = True
+
+    def voice_cb(self, voice):
+        self.cb_triggered = True
+        voice.on_speaking(self.cb)
+        voice.on_incremental_speech(self.cb)
+        voice.on_speech(self.cb)
+
+    def test_voice_callbacks(self):
+
+        hri_listener = pyhri.HRIListener()
+        self.wait()
+
+        hri_listener.on_voice(self.voice_cb)
+
+        self.cb_triggered = False
+        self.voices_pub.publish(ids=["A"])
+        self.wait()
+        self.assertTrue(self.cb_triggered)
+        self.cb_triggered = False
+
+        self.voice_A_is_speaking_pub = rospy.Publisher(
+            "/humans/voices/A/is_speaking", Bool, queue_size=1, latch=False
+        )
+
+        self.voice_A_speech_pub = rospy.Publisher(
+            "/humans/voices/A/speech", LiveSpeech, queue_size=1, latch=False
+        )
+
+        self.voice_A_is_speaking_pub.publish(data=True)
+        self.wait()
+        self.assertTrue(self.cb_triggered)
+        self.assertTrue(hri_listener.voices["A"].is_speaking)
+        self.cb_triggered = False
+
+        self.voice_A_is_speaking_pub.publish(data=False)
+        self.wait()
+        self.assertTrue(self.cb_triggered)
+        self.assertFalse(hri_listener.voices["A"].is_speaking)
+        self.cb_triggered = False
+
+        self.voice_A_speech_pub.publish(final="test speech")
+        self.wait()
+        self.assertTrue(self.cb_triggered)
+        self.assertEquals(hri_listener.voices["A"].speech, "test speech")
+        self.cb_triggered = False
+
+        self.voice_A_speech_pub.publish(incremental="test speech incremental")
+        self.wait()
+        self.assertTrue(self.cb_triggered)
+        self.assertEquals(
+            hri_listener.voices["A"].incremental_speech, "test speech incremental"
+        )
+        self.cb_triggered = False
 
         hri_listener.close()
 
