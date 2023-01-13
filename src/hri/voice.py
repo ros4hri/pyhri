@@ -62,9 +62,14 @@ class Voice:
 
         self.speech: Optional[str] = None  #: last recognised speech, if available
 
+        self.incremental_speech_callbacks = []
+        self.speech_callbacks = []
+
         self.is_speaking: Optional[
             bool
         ] = None  #: whether speech is detected for this voice
+
+        self.is_speaking_callbacks = []
 
         rospy.logdebug("New voice detected: " + self.ns)
 
@@ -90,8 +95,52 @@ class Voice:
         self.incremental_speech = msg.incremental
         self.speech = msg.final
 
+        if self.incremental_speech:
+            for cb in self.incremental_speech_callbacks:
+                cb(self.incremental_speech)
+        if self.speech:
+            for cb in self.speech_callbacks:
+                cb(self.speech)
+
+    def on_incremental_speech(self, callback):
+        """Registers a callback function, to be invoked everytime speech is
+        recognised from this voice. Contrary to Voice.on_speech, this callback is triggered even with intermediary recognition results.
+
+        The callback must accept one single parameter, a string with the recognised text.
+
+        See also: Voice.on_speech to subscribe to the final recognised speech.
+        """
+        self.incremental_speech_callbacks.append(callback)
+
+    def on_speech(self, callback):
+        """Registers a callback function, to be invoked everytime speech is
+        recognised from this voice.
+
+        The callback must accept one single parameter, a string with the recognised text.
+
+        See also: Voice.on_incremental_speech to subscribe to incremental speech (ie, speech *while* it is being recognised).
+        """
+        self.speech_callbacks.append(callback)
+
     def _on_is_speaking(self, msg):
         self.is_speaking = msg.data
+
+        for cb in self.is_speaking_callbacks:
+            cb(self.is_speaking)
+
+    def on_speaking(self, cb):
+        """Registers a callback function, to be invoked everytime speech is
+        detected (ie, the person is speaking) or not detected (ie, the person
+        stops speaking).
+
+        You can access to the recognised speech either via
+        Voice.incremental_speech/Voice.speech, or by prooviding a callback to
+        Voice.on_incremental_speech/Voice.on_speech.
+
+        The callback should take one boolean argument (whether or not the
+        person is speaking).
+        """
+        self.is_speaking_callbacks.append(cb)
 
     def transform(self, from_frame=None):
         """Returns a ROS TransformStamped of the voice, from the `from_frame`
