@@ -13,7 +13,7 @@ from sensor_msgs.msg import RegionOfInterest
 from hri_msgs.msg import IdsList
 from std_msgs.msg import String
 
-import hri
+import pyhri
 
 
 class TestHRI(unittest.TestCase):
@@ -47,7 +47,7 @@ class TestHRI(unittest.TestCase):
 
     def test_get_faces(self):
 
-        hri_listener = hri.HRIListener()
+        hri_listener = pyhri.HRIListener()
         self.wait()
 
         self.assertEquals(self.faces_pub.get_num_connections(), 1)
@@ -76,7 +76,7 @@ class TestHRI(unittest.TestCase):
 
     def test_get_faces_roi(self):
 
-        hri_listener = hri.HRIListener()
+        hri_listener = pyhri.HRIListener()
         self.wait()
 
         roi_A_pub = rospy.Publisher(
@@ -137,7 +137,7 @@ class TestHRI(unittest.TestCase):
 
     def test_get_bodies(self):
 
-        hri_listener = hri.HRIListener()
+        hri_listener = pyhri.HRIListener()
         self.wait()
 
         self.assertEquals(self.bodies_pub.get_num_connections(), 1)
@@ -177,7 +177,7 @@ class TestHRI(unittest.TestCase):
 
     def test_get_voices(self):
 
-        hri_listener = hri.HRIListener()
+        hri_listener = pyhri.HRIListener()
         self.wait()
 
         self.assertEquals(self.voices_pub.get_num_connections(), 1)
@@ -217,7 +217,7 @@ class TestHRI(unittest.TestCase):
 
     def test_get_known_persons(self):
 
-        hri_listener = hri.HRIListener()
+        hri_listener = pyhri.HRIListener()
         self.wait()
 
         self.assertEquals(self.known_persons_pub.get_num_connections(), 1)
@@ -257,7 +257,7 @@ class TestHRI(unittest.TestCase):
 
     def test_get_tracked_persons(self):
 
-        hri_listener = hri.HRIListener()
+        hri_listener = pyhri.HRIListener()
         self.wait()
 
         self.assertEquals(self.tracked_persons_pub.get_num_connections(), 1)
@@ -297,7 +297,7 @@ class TestHRI(unittest.TestCase):
 
     def test_person_attributes(self):
 
-        hri_listener = hri.HRIListener()
+        hri_listener = pyhri.HRIListener()
         self.wait()
 
         person_face_pub = rospy.Publisher(
