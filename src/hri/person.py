@@ -133,9 +133,7 @@ class Person:
         return self._valid
 
     def on_face_id(self, msg):
-        #print(msg)
-        #print(self._hrilistener._faces)
-        if msg.data and msg.data in self._hrilistener._faces:
+        if msg.data and self._hrilistener and msg.data in self._hrilistener._faces:
             self.face_id = msg.data
             self.face = self._hrilistener._faces[self.face_id]
         else:
@@ -143,7 +141,7 @@ class Person:
             self.face = None
 
     def on_body_id(self, msg):
-        if msg.data and msg.data in self._hrilistener._bodies:
+        if msg.data and self._hrilistener and msg.data in self._hrilistener._bodies:
             self.body_id = msg.data
             self.body = self._hrilistener._bodies[self.body_id]
         else:
@@ -151,7 +149,7 @@ class Person:
             self.body = None
 
     def on_voice_id(self, msg):
-        if msg.data and msg.data in self._hrilistener._voices:
+        if msg.data and self._hrilistener and msg.data in self._hrilistener._voices:
             self.voice_id = msg.data
             self.voice = self._hrilistener._voices[self.voice_id]
         else:
