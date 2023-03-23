@@ -30,9 +30,8 @@ from typing import Optional
 
 try:
     import rospy
-    from sensor_msgs.msg import Image
+    from sensor_msgs.msg import RegionOfInterest, Image
     from hri_msgs.msg import (
-        NormalizedRegionOfInterest2D,
         FacialLandmarks,
         SoftBiometrics,
     )
@@ -49,16 +48,11 @@ except ImportError:
 
 
 class Rect:
-    def __init__(self, xmin, ymin, xmax, ymax):
-        self.x = xmin
-        self.y = ymin
-        self.width = xmax - xmin
-        self.height = ymax - ymin
-
-        self.xmin = xmin
-        self.xmax = xmax
-        self.ymin = ymin
-        self.ymax = ymax
+    def __init__(self, x, y, w, h):
+        self.x = x
+        self.y = y
+        self.width = w
+        self.height = h
 
 
 class Face:
@@ -94,7 +88,7 @@ class Face:
         rospy.logdebug("New face detected: " + self.ns)
 
         self._roi_sub = rospy.Subscriber(
-            self.ns + "/roi", NormalizedRegionOfInterest2D, self._on_roi
+            self.ns + "/roi", RegionOfInterest, self._on_roi
         )
 
         self._cropped_sub = rospy.Subscriber(
@@ -129,7 +123,7 @@ class Face:
         return self._valid
 
     def _on_roi(self, msg):
-        self.roi = Rect(msg.xmin, msg.ymin, msg.xmax, msg.ymax)
+        self.roi = Rect(msg.x_offset, msg.y_offset, msg.width, msg.height)
 
     def _on_cropped(self, msg):
         self.cropped = self._cv_bridge.imgmsg_to_cv2(
