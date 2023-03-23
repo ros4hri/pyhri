@@ -30,8 +30,8 @@ from typing import Optional
 
 try:
     import rospy
-    from sensor_msgs.msg import Image
-    from hri_msgs.msg import NormalizedRegionOfInterest2D, Skeleton2D
+    from sensor_msgs.msg import RegionOfInterest, Image
+    from hri_msgs.msg import Skeleton2D
     from cv_bridge import CvBridge
     from geometry_msgs.msg import TransformStamped
 
@@ -76,7 +76,7 @@ class Body:
         rospy.logdebug("New body detected: " + self.ns)
 
         self._roi_sub = rospy.Subscriber(
-            self.ns + "/roi", NormalizedRegionOfInterest2D, self._on_roi
+            self.ns + "/roi", RegionOfInterest, self._on_roi
         )
 
         self._cropped_sub = rospy.Subscriber(
@@ -101,7 +101,7 @@ class Body:
         return self._valid
 
     def _on_roi(self, msg):
-        self.roi = Rect(msg.xmin, msg.ymin, msg.xmax, msg.ymax)
+        self.roi = Rect(msg.x_offset, msg.y_offset, msg.width, msg.height)
 
     def _on_cropped(self, msg):
         self.cropped = self._cv_bridge.imgmsg_to_cv2(

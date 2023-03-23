@@ -133,6 +133,8 @@ class Person:
         return self._valid
 
     def on_face_id(self, msg):
+        #print(msg)
+        #print(self._hrilistener._faces)
         if msg.data and msg.data in self._hrilistener._faces:
             self.face_id = msg.data
             self.face = self._hrilistener._faces[self.face_id]
