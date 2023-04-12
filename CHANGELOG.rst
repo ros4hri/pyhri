@@ -2,8 +2,8 @@
 Changelog for package pyhri
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.4.0 (2023-04-12)
+------------------
 * {hri->pyhri}
   This was causing catkin to not find pyhri when included in other projects
 * add callbacks for speech recognition + tests

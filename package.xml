@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>pyhri</name>
-  <version>0.3.2</version>
+  <version>0.4.0</version>
   <description>A Python wrapper library around the ROS4HRI ROS topics</description>
 
   <maintainer email="severin.lemaignan@pal-robotics.com">Séverin Lemaignan</maintainer>
