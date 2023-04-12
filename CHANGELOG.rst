@@ -2,6 +2,15 @@
 Changelog for package pyhri
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* {hri->pyhri}
+  This was causing catkin to not find pyhri when included in other projects
+* add callbacks for speech recognition + tests
+* fix AttributeError on first detection
+* use sensor_msgs/RegionOfInterest msg for compatibility with other ROS4HRI repos
+* Contributors: Luca Pozzi, Séverin Lemaignan
+
 0.3.2 (2022-10-25)
 ------------------
 * fix RoI-related message types. Unit-tests pass again.
