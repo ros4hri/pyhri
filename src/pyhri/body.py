@@ -30,8 +30,8 @@ from typing import Optional
 
 try:
     import rospy
-    from sensor_msgs.msg import RegionOfInterest, Image
-    from hri_msgs.msg import Skeleton2D
+    from sensor_msgs.msg import Image
+    from hri_msgs.msg import Skeleton2D, NormalizedRegionOfInterest2D
     from cv_bridge import CvBridge
     from geometry_msgs.msg import TransformStamped
 
@@ -42,9 +42,6 @@ except ImportError:
     print(
         "Importing pyhri without rospy! This won't work (except for generating documentation)"
     )
-
-
-from .face import Rect
 
 
 class Body:
@@ -58,8 +55,8 @@ class Body:
         self._valid = True
 
         self.roi: Optional[
-            Rect
-        ] = None  #: the face's region of interest (normalised between 0. and 1.) in the source image, if available
+            NormalizedRegionOfInterest2D
+        ] = None  #: the bodi's region of interest (normalised between 0. and 1.) in the source image, if available
         self.cropped = (
             None  #: the cropped face image, as an OpenCV/numpy array, if available
         )
@@ -76,7 +73,7 @@ class Body:
         rospy.logdebug("New body detected: " + self.ns)
 
         self._roi_sub = rospy.Subscriber(
-            self.ns + "/roi", RegionOfInterest, self._on_roi
+            self.ns + "/roi", NormalizedRegionOfInterest2D, self._on_roi
         )
 
         self._cropped_sub = rospy.Subscriber(
@@ -101,7 +98,7 @@ class Body:
         return self._valid
 
     def _on_roi(self, msg):
-        self.roi = Rect(msg.x_offset, msg.y_offset, msg.width, msg.height)
+        self.roi = msg
 
     def _on_cropped(self, msg):
         self.cropped = self._cv_bridge.imgmsg_to_cv2(

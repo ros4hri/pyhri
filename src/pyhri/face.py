@@ -30,9 +30,10 @@ from typing import Optional
 
 try:
     import rospy
-    from sensor_msgs.msg import RegionOfInterest, Image
+    from sensor_msgs.msg import Image
     from hri_msgs.msg import (
         FacialLandmarks,
+        NormalizedRegionOfInterest2D,
         SoftBiometrics,
     )
     from cv_bridge import CvBridge
@@ -47,14 +48,6 @@ except ImportError:
     )
 
 
-class Rect:
-    def __init__(self, x, y, w, h):
-        self.x = x
-        self.y = y
-        self.width = w
-        self.height = h
-
-
 class Face:
     """Represents a detected face."""
 
@@ -67,7 +60,7 @@ class Face:
         self._valid = True
 
         self.roi: Optional[
-            Rect
+            NormalizedRegionOfInterest2D
         ] = None  #: the face's region of interest (normalised between 0. and 1.) in the source image, if available
         self.cropped = (
             None  #: the cropped face image, as an OpenCV/numpy array, if available
@@ -88,7 +81,7 @@ class Face:
         rospy.logdebug("New face detected: " + self.ns)
 
         self._roi_sub = rospy.Subscriber(
-            self.ns + "/roi", RegionOfInterest, self._on_roi
+            self.ns + "/roi", NormalizedRegionOfInterest2D, self._on_roi
         )
 
         self._cropped_sub = rospy.Subscriber(
@@ -123,7 +116,7 @@ class Face:
         return self._valid
 
     def _on_roi(self, msg):
-        self.roi = Rect(msg.x_offset, msg.y_offset, msg.width, msg.height)
+        self.roi = msg
 
     def _on_cropped(self, msg):
         self.cropped = self._cv_bridge.imgmsg_to_cv2(

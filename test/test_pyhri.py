@@ -9,7 +9,7 @@ import unittest
 import rospy
 import rostest
 
-from hri_msgs.msg import IdsList, LiveSpeech, RegionOfInterest
+from hri_msgs.msg import IdsList, LiveSpeech, NormalizedRegionOfInterest2D
 from std_msgs.msg import String, Bool
 
 import pyhri
@@ -82,13 +82,13 @@ class TestHRI(unittest.TestCase):
 
         roi_A_pub = rospy.Publisher(
             "/humans/faces/A/roi",
-            RegionOfInterest,
+            NormalizedRegionOfInterest2D,
             queue_size=1,
             latch=True,
         )
         roi_B_pub = rospy.Publisher(
             "/humans/faces/B/roi",
-            RegionOfInterest,
+            NormalizedRegionOfInterest2D,
             queue_size=1,
             latch=True,
         )
@@ -114,25 +114,25 @@ class TestHRI(unittest.TestCase):
 
         self.assertIsNone(hri_listener.faces["B"].roi)
 
-        roi_B_pub.publish(width=10)
+        roi_B_pub.publish(xmax=0.1)
         self.wait()
         self.assertIsNotNone(hri_listener.faces["B"].roi)
-        self.assertAlmostEqual(hri_listener.faces["B"].roi.width, 10)
+        self.assertAlmostEqual(hri_listener.faces["B"].roi.xmax, 0.1)
 
-        roi_B_pub.publish(width=20)
+        roi_B_pub.publish(xmax=0.2)
         self.wait()
-        self.assertAlmostEqual(hri_listener.faces["B"].roi.width, 20)
+        self.assertAlmostEqual(hri_listener.faces["B"].roi.xmax, 0.2)
 
         # RoI of face A published *before* face A is published in /faces/tracked,
         # but should still get its RoI, as /roi is latched.
-        roi_A_pub.publish(width=20)
+        roi_A_pub.publish(xmax=0.2)
         self.faces_pub.publish(ids=["A", "B"])
         self.wait(delay=0.1)
 
         self.assertEqual(hri_listener.faces["A"].ns, "/humans/faces/A")
-        self.assertAlmostEqual(hri_listener.faces["A"].roi.width, 20)
+        self.assertAlmostEqual(hri_listener.faces["A"].roi.xmax, 0.2)
         self.assertEqual(hri_listener.faces["B"].ns, "/humans/faces/B")
-        self.assertAlmostEqual(hri_listener.faces["A"].roi.width, 20)
+        self.assertAlmostEqual(hri_listener.faces["A"].roi.xmax, 0.2)
 
         hri_listener.close()
 
