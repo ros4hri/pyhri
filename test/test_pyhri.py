@@ -228,6 +228,14 @@ class TestHRI(unittest.TestCase):
     def test_voice_callbacks(self):
 
         hri_listener = pyhri.HRIListener()
+        
+        self.voice_A_is_speaking_pub = rospy.Publisher(
+            "/humans/voices/A/is_speaking", Bool, queue_size=1, latch=False
+        )
+
+        self.voice_A_speech_pub = rospy.Publisher(
+            "/humans/voices/A/speech", LiveSpeech, queue_size=1, latch=False
+        )
         self.wait()
 
         hri_listener.on_voice(self.voice_cb)
@@ -237,14 +245,6 @@ class TestHRI(unittest.TestCase):
         self.wait()
         self.assertTrue(self.cb_triggered)
         self.cb_triggered = False
-
-        self.voice_A_is_speaking_pub = rospy.Publisher(
-            "/humans/voices/A/is_speaking", Bool, queue_size=1, latch=False
-        )
-
-        self.voice_A_speech_pub = rospy.Publisher(
-            "/humans/voices/A/speech", LiveSpeech, queue_size=1, latch=False
-        )
 
         self.voice_A_is_speaking_pub.publish(data=True)
         self.wait()
