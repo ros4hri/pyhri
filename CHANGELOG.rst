@@ -2,8 +2,8 @@
 Changelog for package pyhri
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.4.1 (2023-07-05)
+------------------
 * fix voice callbacks test
 * change RoI message type to hri_msgs/NormalizedRegionOfInterest2D
 * Contributors: Luka Juricic
