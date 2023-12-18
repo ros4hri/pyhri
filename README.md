@@ -3,6 +3,8 @@
 pyhri: Python wrapper for the ROS4HRI framework
 ===============================================
 
+**Note: this repository only contains ROS 1 support. For ROS 2, check the `libhri` repository.** 
+
 Documentation
 -------------
 
